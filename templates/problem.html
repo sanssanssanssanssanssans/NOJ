@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>{{ p.title }}</title></head>
+<body>
+  <h1>{{ p.title }}</h1>
+  <p>{{ p.description }}</p>
+  <hr>
+  <form action="/submit/{{ p.id }}" method="post" enctype="multipart/form-data">
+    언어:
+    <select name="language">
+      <option value="python">Python</option>
+    </select><br>
+    코드 업로드: <input type="file" name="code"><br>
+    <input type="submit" value="제출">
+  </form>
+</body>
+</html>
