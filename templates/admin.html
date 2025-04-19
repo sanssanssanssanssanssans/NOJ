@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>어드민 문제 출제</title></head>
+<body>
+  <h1>문제 출제</h1>
+  <form method="post" enctype="multipart/form-data">
+    문제 이름: <input name="title"><br>
+    시간 제한(ms): <input name="time_limit" value="1000"><br>
+    메모리 제한(KB): <input name="memory_limit" value="262144"><br>
+    문제 설명:<br><textarea name="description" rows="10" cols="80"></textarea><br>
+    테스트케이스(zip): <input type="file" name="zipfile"><br>
+    <input type="submit" value="문제 등록">
+  </form>
+</body>
+</html>
