@@ -66,6 +66,12 @@ def create_app():
                 app.add_url_rule(rule, endpoint=alias_ep, view_func=app.view_functions[target_ep])
             except Exception:
                 pass
+    if 'ranking.user_profile' in app.view_functions:
+        app.add_url_rule(
+            '/user/<username>',
+            endpoint='user_profile',
+            view_func=app.view_functions['ranking.user_profile']
+        )
 
     return app
 
