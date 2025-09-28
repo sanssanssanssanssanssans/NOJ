@@ -1,19 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head><title>채점 현황</title></head>
-<body>
-  <h1>채점 현황</h1>
-  <table border="1">
-    <tr><th>유저</th><th>문제</th><th>결과</th><th>언어</th><th>시간</th></tr>
-    {% for s in submissions %}
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Status</h2>
+  <table>
+    <thead><tr><th>ID</th><th>User</th><th>PID</th><th>Contest</th><th>Lang</th><th>Result</th><th>Time</th></tr></thead>
+    <tbody>
+    {% for s in submissions|reverse %}
       <tr>
+        <td><a href="{{ url_for('api_submission', sid=s.id) }}" target="_blank">{{ s.id }}</a></td>
         <td>{{ s.username }}</td>
         <td>{{ s.problem_id }}</td>
-        <td>{{ s.result }}</td>
+        <td>{{ s.contest_id or "-" }}</td>
         <td>{{ s.language }}</td>
-        <td>{{ s.timestamp }}</td>
+        <td><strong {% if s.result!='AC' %}class="danger"{% endif %}>{{ s.result }}</strong></td>
+        <td class="muted">{{ s.timestamp }}</td>
       </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">No submissions</td></tr>
     {% endfor %}
+    </tbody>
   </table>
-</body>
-</html>
+</div>
+{% endblock %}

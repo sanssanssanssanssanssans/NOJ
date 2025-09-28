@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>New Thread</h2>
+  <form method="post">
+    <div class="row"><label>Title</label><input name="title" required></div>
+    <div class="row"><label>Tag (optional)</label><input name="tag" placeholder="question, announcement, bug"></div>
+    <div class="row grid grid-2">
+      <div><label>Problem ID (optional)</label><input name="problem_id" placeholder="e.g. abcd1234"></div>
+      <div><label>Contest ID (optional)</label><input name="contest_id" placeholder="e.g. ef567890"></div>
+    </div>
+    <div class="row"><label>Body</label><textarea name="body" rows="10" required></textarea></div>
+    <button class="btn" type="submit">Post</button>
+  </form>
+</div>
+{% endblock %}

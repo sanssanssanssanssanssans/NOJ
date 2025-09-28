@@ -1,0 +1,19 @@
+{
+  "data": [
+    {
+      "id": "03ebe8b4",
+      "title": "테스트 대회",
+      "start": "2025-09-28T19:09:09",
+      "end": "2025-09-30T:20:00:00",
+      "penalty": 20,
+      "problems": [
+        "b4cbfff1"
+      ],
+      "is_private": false,
+      "invite_code": "",
+      "whitelist": [],
+      "freeze_min": 0
+    }
+  ],
+  "sha512": "c97a1af7a1a65f952f7670508c6ed7836e092cb524c55803edd976cf7766ce4ebf193ab5ac4acfe3135e7c612b66e49a74a7761a22ea08defdd5166dbb36c418"
+}

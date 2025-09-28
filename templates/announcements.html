@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h3>Announcements</h3>
+  <ul>
+    {% for a in items %}
+    <li>
+      <strong>{{ a.title }}</strong>
+      <span class="tag">{{ a.created_at }}</span><br>
+      <div>{{ a.body }}</div>
+    </li>
+    {% else %}
+    <li>No announcements</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

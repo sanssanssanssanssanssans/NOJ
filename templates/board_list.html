@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="flex" style="justify-content:space-between;align-items:center">
+    <h2>Board</h2>
+    {% if user %}
+      <a class="btn" href="{{ url_for('board_new') }}">New Thread</a>
+    {% else %}
+      <a class="btn secondary" href="/login">Login to post</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Title</th><th>Tag</th><th>Ref</th><th>Author</th><th>Updated</th></tr></thead>
+    <tbody>
+      {% for t in items %}
+      <tr>
+        <td><a href="{{ url_for('board_thread', tid=t.id) }}">{{ t.title }}</a></td>
+        <td>{{ t.tag or '-' }}</td>
+        <td>
+          {% if t.problem_id %}<span class="tag">P:{{ t.problem_id }}</span>{% endif %}
+          {% if t.contest_id %}<span class="tag">C:{{ t.contest_id }}</span>{% endif %}
+          {% if not t.problem_id and not t.contest_id %}-{% endif %}
+        </td>
+        <td>{{ t.user }}</td>
+        <td class="muted">{{ t.updated_at }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">No threads</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,7 +1,15 @@
-[
-  {
-    "username": "admin",
-    "password": "admin",
-    "is_admin": true
-  },
-]
+{
+  "data": [
+    {
+      "username": "admin",
+      "password": "admin",
+      "is_admin": true
+    },
+    {
+      "username": "asdfasdf",
+      "password": "asdfasdf",
+      "is_admin": false
+    }
+  ],
+  "sha512": "7113ffe16eb9d30d8ac697bfed2d4560b4a6186dedccaed9607c6f709cd76472460dc15d356e9d1c74d5fe6cc7e3ada52ec442b2893cbe752ede333e0b0ea380"
+}

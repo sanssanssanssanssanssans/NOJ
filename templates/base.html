@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>NOJ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{--bg:#ffffff;--fg:#111827;--muted:#6b7280;--card:#ffffff;--border:#e5e7eb;--link:#2563eb;--accent:#111827;--input:#f9fafb;--tag:#374151;--tagbg:#f3f4f6}
+    .dark{--bg:#0b0f16;--fg:#e5e7eb;--muted:#9aa3af;--card:#101826;--border:#1f2937;--link:#60a5fa;--accent:#0ea5e9;--input:#0f172a;--tag:#cbd5e1;--tagbg:#0b1220}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,sans-serif;line-height:1.45}
+    a{color:var(--link);text-decoration:none}
+    header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);}
+    .bar{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .brand{font-weight:700;letter-spacing:.2px}
+    nav{display:flex;gap:12px;flex-wrap:wrap}
+    nav a{padding:6px 8px;border-radius:8px}
+    nav a:hover{background:var(--input)}
+    .container{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:16px}
+    .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+    @media(max-width:960px){.grid-2{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:var(--input);border:1px solid var(--border);border-radius:10px;color:var(--fg);cursor:pointer}
+    .btn:hover{filter:brightness(1.03)}
+    input[type="text"],input[type="search"],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--input);color:var(--fg);outline:none}
+    textarea{min-height:140px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+    th{font-weight:600;text-align:left;color:var(--muted)}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px}
+    .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;color:var(--tag);background:var(--tagbg);border:1px solid var(--border)}
+    .pagination{display:flex;gap:8px;justify-content:center}
+    .tight{gap:12px}
+  </style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="row tight">
+      <a class="brand" href="/">NOJ</a>
+      <nav>
+        <a href="/problems">Problems</a>
+        <a href="/contests">Contests</a>
+        <a href="/ranking">Ranking</a>
+        <a href="/board">Board</a>
+        <a href="/announcements">Announcements</a>
+        <a href="/status">Status</a>
+        <a href="/admin_panel">Admin</a>
+      </nav>
+    </div>
+        <div class="row">
+      <form class="row" method="get" action="/problems">
+        <input type="search" name="q" placeholder="Search problems...">
+        <button class="btn" type="submit">Search</button>
+      </form>
+
+      {% if not user %}
+        <a class="btn" href="/login">Login</a>
+        <a class="btn" href="/register">Sign up</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('user', username=user.username) }}">{{ user.username }}</a>
+        <a class="btn" href="/logout">Logout</a>
+        {% if user.is_admin %}
+          <a class="btn" href="/admin_panel">Admin</a>
+        {% endif %}
+      {% endif %}
+
+      <button id="themeToggle" class="btn" type="button">🌓</button>
+    </div>
+
+  </div>
+</header>
+<div class="container">
+  {% block content %}{% endblock %}
+</div>
+<script src="scripts/base.js">
+</script>
+</body>
+</html>

@@ -1,29 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head><title>문제 목록</title></head>
-<body>
-  <h1>온라인 저지</h1>
-  <div>
-    <a href="/">문제</a> |
-    <a href="/status">채점현황</a> |
-    {% if user %}
-      {% if user.is_admin %}<a href="/admin">어드민</a> |{% endif %}
-      <a href="/logout">로그아웃</a>
-    {% else %}
-      <a href="/login">로그인</a> | <a href="/register">회원가입</a>
+{% extends "base.html" %}
+{% block content %}
+<div class="grid-2">
+  <div class="card">
+    <h3>Recent Problems</h3>
+    <table>
+      <tr><th>Title</th><th>Views</th><th>Added</th></tr>
+      {% for p in recent %}
+      <tr>
+        <td><a href="{{ url_for('problem', pid=p.id) }}">{{ p.title }}</a></td>
+        <td>{{ p.views or 0 }}</td>
+        <td>{{ p.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <div class="row"><a href="/problems">Browse all →</a></div>
+  </div>
+  <div class="card">
+    <h3>Announcements</h3>
+    <ul>
+      {% for a in announcements %}
+      <li><strong>{{ a.title }}</strong> <span class="tag">{{ a.created_at }}</span></li>
+      {% else %}
+      <li>No announcements</li>
+      {% endfor %}
+    </ul>
+    {% if user and user.is_admin %}
+    <div class="row"><a href="/admin/announcement/new">New Announcement</a></div>
     {% endif %}
   </div>
-  <hr>
-  <table border="1">
-    <tr><th>ID</th><th>문제 이름</th><th>채점 현황</th><th>정답률</th></tr>
-    {% for p in problems %}
-      <tr>
-        <td>{{ p.id }}</td>
-        <td><a href="/problem/{{ p.id }}">{{ p.title }}</a></td>
-        <td><a href="/status">보기</a></td>
-        <td>-</td>
-      </tr>
+</div>
+<div class="card">
+  <h3>Contests</h3>
+  <table>
+    <tr><th>Title</th><th>Start</th><th>End</th><th>Private</th></tr>
+    {% for c in contests %}
+    <tr>
+      <td><a href="/contest/{{ c.id }}">{{ c.title }}</a></td>
+      <td>{{ c.start }}</td>
+      <td>{{ c.end }}</td>
+      <td>{{ 'Yes' if c.is_private else 'No' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">No contests</td></tr>
     {% endfor %}
   </table>
-</body>
-</html>
+</div>
+{% endblock %}

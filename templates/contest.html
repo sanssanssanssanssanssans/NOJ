@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ contest.title }}</h2>
+  <div class="muted">{{ contest.start }} ~ {{ contest.end }}</div>
+</div>
+
+<div class="card">
+  <h3>Problems</h3>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Title</th><th>TL</th><th>ML</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for p in problems if p %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td>
+          <a href="{{ url_for('problem', pid=p.id) }}?contest_id={{ contest.id }}">{{ p.title }}</a>
+        </td>
+        <td>{{ p.time_limit }} s</td>
+        <td>{{ p.memory_limit }} MB</td>
+        <td><a class="btn secondary" href="#submit-{{ p.id }}">Submit</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">No problems</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% for p in problems if p %}
+<div class="card" id="submit-{{ p.id }}">
+  <h3>Submit to {{ p.id }} — {{ p.title }}</h3>
+  <form method="post" action="{{ url_for('submit', pid=p.id) }}" enctype="multipart/form-data">
+    <input type="hidden" name="contest_id" value="{{ contest.id }}">
+    <div class="row grid grid-2">
+      <div>
+        <label>Language</label>
+        <select name="language">
+          <option value="cpp">C++17</option>
+          <option value="py">Python 3</option>
+        </select>
+      </div>
+      <div>
+        <label>Upload .cpp/.py (optional)</label>
+        <input type="file" name="code" accept=".cpp,.py">
+      </div>
+    </div>
+    <div class="row">
+      <label>Or paste code</label>
+      <textarea name="code_text" rows="10" placeholder="// paste here"></textarea>
+    </div>
+    <button class="btn" type="submit">Submit</button>
+    <div class="muted">Python은 가산 시간 적용. 출력 비교는 {{ p.cmp or 'exact' }}{% if p.spj %}, SPJ 사용{% endif %}.</div>
+  </form>
+</div>
+{% endfor %}
+
+<div class="card">
+  <a class="btn" href="{{ url_for('contest_standings', cid=contest.id) }}">Standings</a>
+</div>
+{% endblock %}

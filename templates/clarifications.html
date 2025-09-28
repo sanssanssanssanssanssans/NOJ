@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Clarifications — {{ contest.title }}</h2>
+</div>
+<div class="card">
+  <form method="post">
+    <label>Ask a question</label>
+    <textarea name="question" rows="4" required></textarea>
+    <button class="btn" type="submit">Send</button>
+  </form>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Time</th><th>User</th><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      {% for c in items|reverse %}
+      <tr>
+        <td class="muted">{{ c.at }}</td>
+        <td>{{ c.user }}</td>
+        <td>{{ c.question }}</td>
+        <td>
+          {% if c.answer %}{{ c.answer }}
+          {% elif user and user.is_admin %}
+            <form method="post" action="{{ url_for('clarifications_answer', cid=contest.id, qid=c.id) }}">
+              <input name="answer" placeholder="Type answer">
+              <button class="btn secondary" type="submit">Reply</button>
+            </form>
+          {% else %}
+            <span class="muted">Pending</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No clarifications</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
