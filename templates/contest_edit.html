@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h3>Edit Contest</h3>
+  <form method="post" class="grid-2">
+    <div>
+      <label>Title</label>
+      <input type="text" name="title" value="{{ contest.title }}" required>
+    </div>
+    <div></div>
+
+    <div>
+      <label>Start (YYYY-MM-DDTHH:MM:SS)</label>
+      <input type="text" name="start" value="{{ contest.start }}" required>
+    </div>
+    <div>
+      <label>End (YYYY-MM-DDTHH:MM:SS)</label>
+      <input type="text" name="end" value="{{ contest.end }}" required>
+    </div>
+
+    <div>
+      <label>Penalty (min)</label>
+      <input type="number" name="penalty" value="{{ contest.penalty }}">
+    </div>
+    <div>
+      <label>Freeze (minutes)</label>
+      <input type="number" name="freeze_min" value="{{ contest.freeze_min or 0 }}">
+    </div>
+
+    <div class="row">
+      <label><input type="checkbox" name="is_private" {% if contest.is_private %}checked{% endif %}> Private</label>
+    </div>
+    <div>
+      <label>Whitelist (comma-separated usernames)</label>
+      <input type="text" name="whitelist" value="{{ contest.whitelist|join(', ') }}">
+    </div>
+
+    <div style="grid-column:1/-1">
+      <label>Problem IDs (comma-separated)</label>
+      <input type="text" name="problem_ids" value="{{ contest.problems|join(', ') }}">
+    </div>
+
+    <div style="grid-column:1/-1" class="row">
+      <button class="btn" type="submit">Save</button>
+      <a class="btn" href="{{ url_for('contests.contest_view', cid=contest.id) }}">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

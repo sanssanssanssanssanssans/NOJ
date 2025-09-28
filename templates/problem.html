@@ -1,17 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head><title>{{ p.title }}</title></head>
-<body>
-  <h1>{{ p.title }}</h1>
-  <p>{{ p.description }}</p>
-  <hr>
-  <form action="/submit/{{ p.id }}" method="post" enctype="multipart/form-data">
-    언어:
-    <select name="language">
-      <option value="python">Python</option>
-    </select><br>
-    코드 업로드: <input type="file" name="code"><br>
-    <input type="submit" value="제출">
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ p.title }}</h2>
+  <div class="muted">
+    ID: <code>{{ p.id }}</code> · TL {{ p.time_limit }} s · ML {{ p.memory_limit }} MB · Judge: {{ p.cmp or 'exact' }}{% if p.spj %} + SPJ{% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div>{{ description_html|safe }}</div>
+</div>
+
+<div class="card">
+  <h3>Submit</h3>
+  <form method="post" action="{{ url_for('submit', pid=p.id) }}" enctype="multipart/form-data">
+    <input type="hidden" name="contest_id" value="{{ request.args.get('contest_id','') }}">
+    <div class="row grid grid-2">
+      <div>
+        <label>Language</label>
+        <select name="language">
+          <option value="cpp">C++17</option>
+          <option value="py">Python 3</option>
+        </select>
+      </div>
+      <div>
+        <label>Upload .cpp/.py (optional)</label>
+        <input type="file" name="code" accept=".cpp,.py">
+      </div>
+    </div>
+    <div class="row">
+      <label>Or paste code</label>
+      <textarea name="code_text" rows="12" placeholder="# paste here"></textarea>
+    </div>
+    <button class="btn" type="submit">Submit</button>
+    <div class="muted">Python은 가산 시간 적용. 출력 비교는 {{ p.cmp or 'exact' }}{% if p.spj %}, SPJ 사용{% endif %}.</div>
   </form>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h3>Edit Problem</h3>
+  <form method="post" enctype="multipart/form-data">
+    <label>Title</label>
+    <input type="text" name="title" value="{{ p.title }}" required>
+
+    <label>Description (Markdown)</label>
+    <textarea name="description">{{ p.description }}</textarea>
+
+    <div class="grid-2">
+      <div>
+        <label>Time Limit (sec)</label>
+        <input type="number" step="0.1" name="time_limit" value="{{ p.time_limit }}">
+      </div>
+      <div>
+        <label>Memory Limit (MB)</label>
+        <input type="number" name="memory_limit" value="{{ p.memory_limit }}">
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Compare Mode</label>
+        <select name="cmp_mode">
+          {% set cmp=p.cmp or 'exact' %}
+          <option value="exact" {{ 'selected' if cmp=='exact' }}>exact</option>
+          <option value="ignore_ws" {{ 'selected' if cmp=='ignore_ws' }}>ignore_ws</option>
+          <option value="token" {{ 'selected' if cmp=='token' }}>token</option>
+        </select>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" name="spj" {% if p.spj %}checked{% endif %}> Special Judge (spj.py)</label>
+      </div>
+    </div>
+
+    <label>Visibility</label>
+    {% set vis=p.visibility or 'public' %}
+    <select name="visibility">
+      <option value="public" {{ 'selected' if vis=='public' }}>public</option>
+      <option value="contest_only" {{ 'selected' if vis=='contest_only' }}>contest_only</option>
+      <option value="after_contest" {{ 'selected' if vis=='after_contest' }}>after_contest</option>
+    </select>
+
+    <label>Replace Testcases (ZIP)</label>
+    <input type="file" name="zipfile" accept=".zip">
+
+    <div class="row" style="margin-top:10px">
+      <button class="btn" type="submit">Save</button>
+      <a class="btn" href="{{ url_for('problem', pid=p.id) }}">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

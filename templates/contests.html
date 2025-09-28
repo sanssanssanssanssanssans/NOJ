@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Contests</h2>
+  <ul>
+    {% for c in contests %}
+      <li>
+        <a href="{{ url_for('contest_view', cid=c.id) }}">{{ c.title }}</a>
+        <span class="muted">({{ c.start }} ~ {{ c.end }})</span>
+      </li>
+    {% else %}
+      <li class="muted">No contests</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

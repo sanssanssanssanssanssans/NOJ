@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ contest.title }}</h2>
+  <p class="muted">This contest is private.</p>
+  <form method="post" action="{{ url_for('contest_join', cid=contest.id) }}">
+    <label>Invite Code</label>
+    <input name="invite" required>
+    <button class="btn" type="submit">Join</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,182 +1,86 @@
-from flask import Flask, request, session, redirect, url_for, render_template, jsonify
-import os, json, uuid, zipfile, subprocess, shutil, time
+from flask import Flask, session
+import os
+from storage import migrate_all, DATA_DIR
+from blueprints.auth import bp as auth_bp
+from blueprints.main import bp as main_bp
+from blueprints.problems import bp as problems_bp
+from blueprints.contests import bp as contests_bp
+from blueprints.submissions import bp as submissions_bp
+from blueprints.board import bp as board_bp
+from blueprints.ranking import bp as ranking_bp
+from blueprints.clarifications import bp as clarifications_bp
+from blueprints.announcements import bp as announcements_bp
 
-app = Flask(__name__)
-app.secret_key = 'supersecretkey'
+def create_app():
+    app = Flask(__name__)
+    app.secret_key = os.environ.get("APP_SECRET", "supersecretkey")
+    app.config.update(
+        SESSION_COOKIE_NAME="noj_session",
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=False,
+        PERMANENT_SESSION_LIFETIME=60*60*24*14,
+        SESSION_REFRESH_EACH_REQUEST=True,
+        PREFERRED_URL_SCHEME="http",
+        SERVER_NAME=None,
+    )
+    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs("submissions", exist_ok=True)
+    os.makedirs("testcases", exist_ok=True)
+    migrate_all()
+    app.register_blueprint(main_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(problems_bp)
+    app.register_blueprint(contests_bp)
+    app.register_blueprint(submissions_bp)
+    app.register_blueprint(board_bp)
+    app.register_blueprint(ranking_bp)
+    app.register_blueprint(clarifications_bp)
+    app.register_blueprint(announcements_bp)
+    @app.context_processor
+    def inject_user():
+        return {"user": session.get("user")}
+    alias_map = [
+        ("/problem/<pid>","problem","problems.problem"),
+        ("/submit/<pid>","submit","submissions.submit"),
+        ("/status","status","main.status"),
+        ("/admin_panel","admin_panel","problems.admin_panel"),
+        ("/admin/problem/<pid>/edit","admin_problem_edit","problems.admin_problem_edit"),
+        ("/admin/problem/new","admin_problem_new","problems.admin_problem_new"),
+        ("/admin","admin","problems.admin_legacy"),
+        ("/problems","problems","problems.problems_list"),
+        ("/contests","contests","contests.contests_list"),
+        ("/contest_admin","contest_admin","contests.contest_admin"),
+        ("/contest/<cid>","contest","contests.contest_view"),
+        ("/contest/<cid>","contest_view","contests.contest_view"),
+        ("/contest/<cid>/join","contest_join","contests.contest_join"),
+        ("/contest/<cid>/standings","contest_standings","contests.contest_standings"),
+        ("/contest/<cid>/finalize","contest_finalize","contests.contest_finalize"),
+        ("/clarifications/<cid>","clarifications","clarifications.clarifications"),
+        ("/clarifications/<cid>/answer/<qid>","clarifications_answer","clarifications.clarifications_answer"),
+        ("/ranking","ranking","ranking.ranking"),
+        ("/user/<username>","user","ranking.user_profile"),
+        ("/user/<username>","user_profile","ranking.user_profile"),
+        ("/board","board","board.board_list"),
+        ("/board/new","board_new","board.board_new"),
+        ("/board/<tid>","board_thread","board.board_thread"),
+        ("/admin/contest/<cid>/edit", "contest_edit", "contests.contest_edit"),
+        ("/login","login","auth.login"),
+        ("/logout","logout","auth.logout"),
+        ("/register","register","auth.register"),
+        ("/announcements","announcements","announcements.list_ann"),
+        ("/admin/announcement/new","announcement_new","announcements.new_ann"),
+        ("/api/submission/<sid>","api_submission","submissions.api_submission"),
+    ]
+    for rule, alias_ep, target_ep in alias_map:
+        if target_ep in app.view_functions:
+            try:
+                app.add_url_rule(rule, endpoint=alias_ep, view_func=app.view_functions[target_ep])
+            except Exception:
+                pass
+    return app
 
-os.makedirs("data", exist_ok=True)
-os.makedirs("submissions", exist_ok=True)
-os.makedirs("testcases", exist_ok=True)
-
-for file in ["users.json", "problems.json", "submissions.json"]:
-    path = f"data/{file}"
-    if not os.path.exists(path):
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump([] if file != "users.json" else [{"username": "admin", "password": "admin", "is_admin": True}], f)
-
-def load_json(file):
-    with open(file, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def save_json(file, data):
-    with open(file, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-
-@app.route('/')
-def index():
-    problems = load_json("data/problems.json")
-    return render_template("index.html", problems=problems, user=session.get("user"))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        users = load_json("data/users.json")
-        for u in users:
-            if u['username'] == request.form['username'] and u['password'] == request.form['password']:
-                session['user'] = u
-                return redirect('/')
-        return "Login Failed"
-    return render_template("login.html")
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/')
-
-@app.route('/change_password', methods=['GET', 'POST'])
-def change_password():
-    if 'user' not in session:
-        return redirect('/login')
-
-    if request.method == 'POST':
-        old_pw = request.form['old_password']
-        new_pw = request.form['new_password']
-
-        users = load_json("data/users.json")
-        for u in users:
-            if u['username'] == session['user']['username']:
-                if u['password'] != old_pw:
-                    return "Current password is incorrect"
-                u['password'] = new_pw
-                save_json("data/users.json", users)
-                session['user'] = u  # 세션도 업데이트
-                return redirect('/')
-        return "User not found"
-
-    return render_template("change_password.html")
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        users = load_json("data/users.json")
-        new_user = {
-            "username": request.form['username'],
-            "password": request.form['password'],
-            "is_admin": False
-        }
-        users.append(new_user)
-        save_json("data/users.json", users)
-        return redirect('/login')
-    return render_template("register.html")
-
-@app.route('/admin', methods=['GET', 'POST'])
-def admin():
-    if 'user' not in session or not session['user'].get('is_admin'):
-        return "Unauthorized"
-
-    if request.method == 'POST':
-        problems = load_json("data/problems.json")
-        pid = str(uuid.uuid4())[:8]
-        zip_file = request.files['zipfile']
-        zip_path = f"testcases/{pid}.zip"
-        zip_file.save(zip_path)
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            extract_path = f"testcases/{pid}"
-            os.makedirs(extract_path, exist_ok=True)
-            zip_ref.extractall(extract_path)
-        problems.append({
-            "id": pid,
-            "title": request.form['title'],
-            "description": request.form['description'],
-            "time_limit": request.form['time_limit'],
-            "memory_limit": request.form['memory_limit']
-        })
-        save_json("data/problems.json", problems)
-        return redirect('/')
-
-    return render_template("admin.html")
-
-@app.route('/status')
-def status():
-    submissions = load_json("data/submissions.json")
-    return render_template("status.html", submissions=submissions)
-
-@app.route('/problem/<pid>')
-def problem(pid):
-    problems = load_json("data/problems.json")
-    p = next(p for p in problems if p['id'] == pid)
-    return render_template("problem.html", p=p)
-
-@app.route('/submit/<pid>', methods=['POST'])
-def submit(pid):
-    if 'user' not in session:
-        return "Login required"
-
-    language = request.form['language']
-    code_file = request.files['code']
-    sub_id = str(uuid.uuid4())[:8]
-    sub_path = f"submissions/{sub_id}"
-    os.makedirs(sub_path, exist_ok=True)
-    ext = 'cpp' if language == 'cpp' else 'py'
-    src_path = f"{sub_path}/Main.{ext}"
-    code_file.save(src_path)
-
-    testcase_dir = f"testcases/{pid}"
-    inputs = sorted(f for f in os.listdir(testcase_dir) if f.endswith('.in'))
-    outputs = sorted(f for f in os.listdir(testcase_dir) if f.endswith('.out'))
-
-    verdict = 'AC'
-    for i, (inp, out) in enumerate(zip(inputs, outputs)):
-        input_path = os.path.join(testcase_dir, inp)
-        expected_path = os.path.join(testcase_dir, out)
-        with open(expected_path, encoding='utf-8') as f:
-            expected = f.read().strip()
-
-        output_path = f"{sub_path}/output.txt"
-        try:
-            if language == 'cpp':
-                exe = f"{sub_path}/a.out"
-                subprocess.run(['g++', src_path, '-o', exe], check=True)
-                with open(input_path, encoding='utf-8') as fin, open(output_path, 'w', encoding='utf-8') as fout:
-                    subprocess.run([exe], stdin=fin, stdout=fout, timeout=2)
-            else:
-                with open(input_path, encoding='utf-8') as fin, open(output_path, 'w', encoding='utf-8') as fout:
-                    subprocess.run(['python3', src_path], stdin=fin, stdout=fout, timeout=2)
-        except Exception as e:
-            verdict = 'RE'
-            break
-
-        with open(output_path, encoding='utf-8') as f:
-            user_output = f.read().strip()
-        if user_output != expected:
-            verdict = 'WA'
-            break
-
-    submissions = load_json("data/submissions.json")
-    submissions.append({
-        "username": session['user']['username'],
-        "problem_id": pid,
-        "result": verdict,
-        "language": language,
-        "timestamp": time.strftime('%Y-%m-%d %H:%M:%S')
-    })
-    save_json("data/submissions.json", submissions)
-
-    shutil.rmtree(sub_path)
-    return redirect('/status')
-
-if __name__ == '__main__':
-    import os
+if __name__ == "__main__":
+    app = create_app()
     port = int(os.environ.get("PORT", 8000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, use_reloader=False)

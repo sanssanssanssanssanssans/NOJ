@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ t.title }}</h2>
+  <div class="flex">
+    {% if t.tag %}<span class="tag">{{ t.tag }}</span>{% endif %}
+    {% if t.problem_id %}<span class="tag">P:{{ t.problem_id }}</span>{% endif %}
+    {% if t.contest_id %}<span class="tag">C:{{ t.contest_id }}</span>{% endif %}
+  </div>
+  <div class="muted" style="margin-top:6px">by {{ t.user }} · {{ t.created_at }}</div>
+</div>
+
+<div class="card">
+  <pre style="white-space:pre-wrap;margin:0">{{ t.body }}</pre>
+</div>
+
+<div class="card">
+  <h3>Replies</h3>
+  <div>
+    {% for r in t.replies %}
+      <div class="card" style="margin:8px 0">
+        <div class="muted">{{ r.user }} · {{ r.at }}</div>
+        <div style="margin-top:6px;white-space:pre-wrap">{{ r.body }}</div>
+      </div>
+    {% else %}
+      <div class="muted">No replies yet</div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  {% if user %}
+  <form method="post">
+    <label>Add reply</label>
+    <textarea name="reply" rows="5" required></textarea>
+    <button class="btn" type="submit">Reply</button>
+  </form>
+  {% else %}
+    <a class="btn secondary" href="/login">Login to reply</a>
+  {% endif %}
+</div>
+{% endblock %}

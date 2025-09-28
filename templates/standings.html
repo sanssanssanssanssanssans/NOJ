@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>{{ contest.title }} — Standings</h2>
+  <div class="muted">{{ contest.start }} ~ {{ contest.end }}{% if frozen %} · frozen{% endif %}</div>
+</div>
+
+<div class="card">
+  {% if ranking %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>User</th><th>Solved</th><th>Penalty</th>
+        {% for pid in contest.problems %}<th>{{ pid }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in ranking %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td><a href="{{ url_for('user_profile', username=row.username) }}">{{ row.username }}</a></td>
+        <td>{{ row.solved }}</td>
+        <td>{{ row.penalty }}</td>
+        {% for pid in contest.problems %}
+          {% set d=row.detail.get(pid) %}
+          <td>
+            {% if d %}
+              {% if d.ac %}AC{% else %}{{ d.tries }}x{% endif %}
+              {% if d.time is not none %}@{{ d.time }}{% endif %}
+              {% if d.frozen %} (F){% endif %}
+            {% else %}-{% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="muted">No submissions in contest window yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

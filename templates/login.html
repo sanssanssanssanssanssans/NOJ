@@ -1,12 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head><title>로그인</title></head>
-<body>
-  <h1>로그인</h1>
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Login</h2>
   <form method="post">
-    아이디: <input name="username"><br>
-    비밀번호: <input name="password" type="password"><br>
-    <input type="submit" value="로그인">
+    <div class="row">
+      <label>Username</label>
+      <input name="username" required>
+    </div>
+    <div class="row">
+      <label>Password</label>
+      <input type="password" name="password" required>
+    </div>
+    <button class="btn" type="submit">Login</button>
   </form>
-</body>
-</html>
+</div>
+{% endblock %}

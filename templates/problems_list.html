@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <form class="inline" method="get" action="/problems">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search problems...">
+    <button type="submit">Search</button>
+  </form>
+</div>
+<div class="card">
+  <h3>Problems</h3>
+  <table>
+    <tr><th>Title</th><th>Views</th><th>Added</th></tr>
+    {% for p in items %}
+    <tr>
+      <td><a href="{{ url_for('problem', pid=p.id) }}">{{ p.title }}</a></td>
+      <td>{{ p.views or 0 }}</td>
+      <td>{{ p.created_at }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3">No results</td></tr>
+    {% endfor %}
+  </table>
+  <div class="pagination">
+    {% if page>1 %}<a href="/problems?q={{ q }}&page={{ page-1 }}"><button>&laquo; Prev</button></a>{% endif %}
+    <span>Page {{ page }} / {{ pages }}</span>
+    {% if page<pages %}<a href="/problems?q={{ q }}&page={{ page+1 }}"><button>Next &raquo;</button></a>{% endif %}
+  </div>
+</div>
+{% endblock %}
