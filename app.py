@@ -43,6 +43,29 @@ def logout():
     session.clear()
     return redirect('/')
 
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    if 'user' not in session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        old_pw = request.form['old_password']
+        new_pw = request.form['new_password']
+
+        users = load_json("data/users.json")
+        for u in users:
+            if u['username'] == session['user']['username']:
+                if u['password'] != old_pw:
+                    return "Current password is incorrect"
+                u['password'] = new_pw
+                save_json("data/users.json", users)
+                session['user'] = u  # 세션도 업데이트
+                return redirect('/')
+        return "User not found"
+
+    return render_template("change_password.html")
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
