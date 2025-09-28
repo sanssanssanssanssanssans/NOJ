@@ -2,28 +2,26 @@
 {% block content %}
 <div class="card">
   <h2>{{ u.username }}</h2>
-  <div class="flex">
-    <div class="tag">Rating: {{ u.rating or 1500 }}</div>
-    <div class="tag">Contests: {{ u.contests or 0 }}</div>
-    {% if u.is_admin %}<div class="tag">admin</div>{% endif %}
+  <div class="muted">
+    Solved: <b>{{ u.solved_count or 0 }}</b>
+    {% if u.is_admin %} · <span class="tag">admin</span>{% endif %}
   </div>
 </div>
 
 <div class="card">
   <h3>Recent Submissions</h3>
   <table>
-    <thead><tr><th>Time</th><th>Problem</th><th>Contest</th><th>Lang</th><th>Result</th></tr></thead>
+    <thead><tr><th>Time</th><th>Problem</th><th>Lang</th><th>Result</th></tr></thead>
     <tbody>
       {% for s in recent %}
       <tr>
-        <td class="muted">{{ s.timestamp }}</td>
-        <td>{{ s.problem_id }}</td>
-        <td>{{ s.contest_id or "-" }}</td>
+        <td>{{ s.timestamp }}</td>
+        <td><a href="{{ url_for('problem', pid=s.problem_id) }}">{{ s.problem_id }}</a></td>
         <td>{{ s.language }}</td>
-        <td><strong {% if s.result!='AC' %}class="danger"{% endif %}>{{ s.result }}</strong></td>
+        <td>{{ s.result }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="5" class="muted">No submissions</td></tr>
+      <tr><td colspan="4" class="muted">No submissions</td></tr>
       {% endfor %}
     </tbody>
   </table>

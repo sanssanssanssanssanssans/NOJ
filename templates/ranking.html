@@ -1,19 +1,24 @@
-
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
-  <h2>Ranking</h2>
+  <h2>Ranking (by solved count)</h2>
+</div>
+
+<div class="card">
   <table>
     <thead>
-      <tr><th>#</th><th>User</th><th>Rating</th><th>Contests</th></tr>
+      <tr><th>#</th><th>User</th><th>Solved</th><th>Last AC</th></tr>
     </thead>
     <tbody>
       {% for r in rows %}
       <tr>
         <td>{{ loop.index }}</td>
-        <td><a href="{{ url_for('user_profile', username=r.username) }}">{{ r.username }}</a>{% if r.is_admin %} <span class="tag">admin</span>{% endif %}</td>
-        <td><strong>{{ r.rating }}</strong></td>
-        <td>{{ r.contests }}</td>
+        <td>
+          <a href="{{ url_for('user_profile', username=r.username) }}">{{ r.username }}</a>
+          {% if r.is_admin %} <span class="tag">admin</span>{% endif %}
+        </td>
+        <td>{{ r.solved_count }}</td>
+        <td>{{ r.last_ac.strftime('%Y-%m-%d %H:%M:%S') if r.last_ac else '-' }}</td>
       </tr>
       {% else %}
       <tr><td colspan="4" class="muted">No users</td></tr>
