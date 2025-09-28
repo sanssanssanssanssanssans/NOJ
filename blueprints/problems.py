@@ -14,10 +14,16 @@ def admin_required():
 @bp.route("/admin_panel")
 def admin_panel():
     admin_required()
-    from models import get_submissions
-    subs=get_submissions()
-    contests=get_contests()
-    return render_template("admin_panel.html", user=session.get("user"), submissions=subs, contests=contests)
+    from models import get_submissions, get_problems
+    subs = get_submissions()
+    problems = get_problems()
+    # contests 제거
+    return render_template(
+        "admin_panel.html",
+        user=session.get("user"),
+        submissions=subs,
+        problems=problems,
+    )
 
 @bp.route("/admin/problem/new", methods=["GET","POST"])
 def admin_problem_new():

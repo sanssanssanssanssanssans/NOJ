@@ -2,90 +2,60 @@
 {% block content %}
 
 <div class="card">
-  <h3>Admin Panel</h3>
+  <h2>Admin Panel</h2>
   <div class="row">
-    <a class="btn" href="{{ url_for('admin_problem_new') }}">New Problem</a>
-    <a class="btn" href="{{ url_for('contest_admin') }}">New Contest</a>
-    <a class="btn" href="{{ url_for('announcement_new') }}">New Announcement</a>
+    <a class="btn" href="{{ url_for('problems.admin_problem_new') }}">New Problem</a>
   </div>
 </div>
 
 <div class="card">
   <h3>Problems</h3>
-  <div class="table-wrap">
-    <table>
-      <tr>
-        <th>ID</th><th>Title</th><th>Visibility</th><th>TC Ver</th><th>Actions</th>
-      </tr>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Title</th><th>TL</th><th>ML</th><th>Visibility</th><th></th></tr>
+    </thead>
+    <tbody>
       {% for p in problems %}
       <tr>
-        <td>{{ p.id }}</td>
-        <td><a href="{{ url_for('problem', pid=p.id) }}">{{ p.title }}</a></td>
+        <td><code>{{ p.id }}</code></td>
+        <td><a href="{{ url_for('problems.problem', pid=p.id) }}">{{ p.title }}</a></td>
+        <td>{{ p.time_limit }}</td>
+        <td>{{ p.memory_limit }}</td>
+        <td>{{ p.visibility or 'public' }}</td>
         <td>
-          <form method="post" action="{{ url_for('problems.admin_problem_edit', pid=p.id) }}" enctype="multipart/form-data" class="row">
-            {% set vis = p.visibility or 'public' %}
-            <select name="visibility">
-              <option value="public" {{ 'selected' if vis=='public' }}>public</option>
-              <option value="contest_only" {{ 'selected' if vis=='contest_only' }}>contest_only</option>
-              <option value="after_contest" {{ 'selected' if vis=='after_contest' }}>after_contest</option>
-            </select>
-            <input type="hidden" name="title" value="{{ p.title }}">
-            <input type="hidden" name="description" value="{{ p.description }}">
-            <input type="hidden" name="time_limit" value="{{ p.time_limit }}">
-            <input type="hidden" name="memory_limit" value="{{ p.memory_limit }}">
-            <input type="hidden" name="cmp_mode" value="{{ p.cmp }}">
-            <input type="hidden" name="spj" value="{{ 'on' if p.spj else 'off' }}">
-            <button class="btn" type="submit">Save</button>
-          </form>
-        </td>
-        <td>{{ p.tc_version or 1 }}</td>
-        <td class="row">
-          <a class="btn" href="{{ url_for('admin_problem_edit', pid=p.id) }}">Edit</a>
-          <form method="post" action="{{ url_for('problems.admin_problem_edit', pid=p.id) }}" enctype="multipart/form-data" class="row" style="gap:6px">
-            <input type="file" name="zipfile" accept=".zip">
-            <input type="hidden" name="title" value="{{ p.title }}">
-            <input type="hidden" name="description" value="{{ p.description }}">
-            <input type="hidden" name="time_limit" value="{{ p.time_limit }}">
-            <input type="hidden" name="memory_limit" value="{{ p.memory_limit }}">
-            <input type="hidden" name="cmp_mode" value="{{ p.cmp }}">
-            <input type="hidden" name="spj" value="{{ 'on' if p.spj else 'off' }}">
-            <input type="hidden" name="visibility" value="{{ p.visibility or 'public' }}">
-            <button class="btn" type="submit">Replace TC</button>
-          </form>
+          <a class="btn secondary" href="{{ url_for('problems.admin_problem_edit', pid=p.id) }}">Edit</a>
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="5">No problems</td></tr>
+      <tr><td colspan="6" class="muted">No problems</td></tr>
       {% endfor %}
-    </table>
-  </div>
+    </tbody>
+  </table>
 </div>
 
 <div class="card">
-  <h3>Contests</h3>
-  <div class="table-wrap">
-    <table>
+  <h3>Recent Submissions</h3>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>User</th><th>Problem</th><th>Lang</th><th>Result</th><th>At</th></tr>
+    </thead>
+    <tbody>
+      {% for s in (submissions|sort(attribute='timestamp')|reverse|list)[:50] %}
       <tr>
-        <th>ID</th><th>Title</th><th>Start</th><th>End</th><th>Private</th><th>Penalty</th><th>Problems</th><th>Actions</th>
-      </tr>
-      {% for c in contests %}
-      <tr>
-        <td>{{ c.id }}</td>
-        <td><a href="{{ url_for('contest', cid=c.id) }}">{{ c.title }}</a></td>
-        <td>{{ c.start }}</td>
-        <td>{{ c.end }}</td>
-        <td>{{ 'Yes' if c.is_private else 'No' }}</td>
-        <td>{{ c.penalty }}</td>
-        <td>{{ c.problems|join(', ') }}</td>
-        <td class="row">
-          <a class="btn" href="{{ url_for('contest_standings', cid=c.id) }}">Standings</a>
-          <a class="btn" href="{{ url_for('contests.contest_edit', cid=c.id) }}">Edit</a>
-        </td>
+        <td><a href="{{ url_for('submissions.api_submission', sid=s.id) }}" target="_blank">{{ s.id }}</a></td>
+        <td>{{ s.username }}</td>
+        <td><a href="{{ url_for('problems.problem', pid=s.problem_id) }}">{{ s.problem_id }}</a></td>
+        <td>{{ s.language }}</td>
+        <td>{{ s.result }}</td>
+        <td>{{ s.timestamp }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="8">No contests</td></tr>
+      <tr><td colspan="6" class="muted">No submissions</td></tr>
       {% endfor %}
-    </table>
-  </div>
+    </tbody>
+  </table>
 </div>
+
+
+
 {% endblock %}

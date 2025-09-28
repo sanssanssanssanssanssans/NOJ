@@ -24,24 +24,17 @@ def main():
 
     backup_dir = "backup_repo"
     remote_url = f"https://x-access-token:{token}@github.com/{repo}.git"
-
-    # clone or pull
     if not os.path.exists(backup_dir):
         run(f"git clone {remote_url} {backup_dir}")
     else:
         run("git pull origin main", cwd=backup_dir)
-
-    # copy data (예: DATA_DIR 안 json, submissions 등)
-    data_dir = "data"  # NOJ의 데이터 저장 디렉토리
+    data_dir = "data"
     if not os.path.exists(data_dir):
         print("⚠️ data directory not found, skipping copy")
     else:
         run(f"cp -r {data_dir}/* {backup_dir}/")
-
-    # commit & push
     run(f'git config user.email "{email}"', cwd=backup_dir)
     run(f'git config user.name "{name}"', cwd=backup_dir)
-
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     run("git add .", cwd=backup_dir)
     run(f'git commit -m "Backup at {ts}" || echo "Nothing to commit"', cwd=backup_dir)

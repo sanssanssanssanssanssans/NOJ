@@ -14,7 +14,7 @@
       <tr>
         <td>{{ loop.index }}</td>
         <td>
-          <a href="{{ url_for('user_profile', username=r.username) }}">{{ r.username }}</a>
+          <a href="{{ url_for('ranking.user_profile', username=r.username) }}">{{ r.username }}</a>
           {% if r.is_admin %} <span class="tag">admin</span>{% endif %}
         </td>
         <td>{{ r.solved_count }}</td>
